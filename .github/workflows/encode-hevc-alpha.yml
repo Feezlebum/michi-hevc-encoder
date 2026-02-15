@@ -1,0 +1,34 @@
+name: Encode HEVC with Alpha
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  encode:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Install FFmpeg
+        run: brew install ffmpeg
+      
+      - name: Encode HEVC with Alpha
+        run: |
+          ffmpeg -framerate 24 -i frames/frame_%04d.png \
+            -c:v hevc_videotoolbox \
+            -allow_sw 1 \
+            -alpha_quality 0.75 \
+            -tag:v hvc1 \
+            -movflags faststart \
+            michi_transparent.mov
+          
+          ls -la michi_transparent.mov
+      
+      - name: Upload Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: hevc-alpha-video
+          path: michi_transparent.mov
+          retention-days: 7
